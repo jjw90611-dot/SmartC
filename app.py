@@ -32,14 +32,8 @@ hide_streamlit_style = """
         padding: 0 !important;
         max-width: 100% !important;
     }
-    .stApp {
-        margin: 0;
-        padding: 0;
-    }
-    iframe {
-        width: 100%;
-        border: none;
-    }
+    .stApp { margin: 0; padding: 0; }
+    iframe { width: 100%; border: none; }
     section[data-testid="stSidebar"] {display: none;}
 </style>
 """
@@ -51,7 +45,6 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 COUNTER_FILE = "view_count.json"
 
 def load_counter():
-    """조회수 데이터 로드"""
     if not os.path.exists(COUNTER_FILE):
         return {"total": 0, "daily": {}}
     try:
@@ -61,7 +54,6 @@ def load_counter():
         return {"total": 0, "daily": {}}
 
 def save_counter(data):
-    """조회수 데이터 저장"""
     try:
         with open(COUNTER_FILE, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
@@ -90,31 +82,24 @@ html_path = Path(__file__).parent / "index.html"
 html_content = html_path.read_text(encoding="utf-8")
 
 # ================================================================
-# 조회수 표시 (footer 위에 삽입) - 원본 코드 훼손 없이 삽입만 진행
+# ✅ 조회수 "값만" 치환 (중복 삽입 방지)
+#    - index.html에 이미 <b id="todayCount">0</b>, <b id="totalCount">0</b> 존재
+#    - 초기값 '0'을 실제 카운트 값으로 교체
 # ================================================================
-view_counter_html = f'''
-    <div style="text-align:center; padding: 16px 18px 0 18px; background: var(--bg);">
-      <div style="display:inline-flex; align-items:center; background:white; border:1px solid var(--border); border-radius:12px; padding:10px 20px; box-shadow:0 2px 8px rgba(0,0,0,0.05); font-size:16px; color:var(--posco-navy);">
-        <span style="margin:0 8px;">📊 조회수</span>
-        <span style="margin:0 8px;">Today <b style="color:var(--posco-blue); font-size:18px;">{today_cnt}</b></span>
-        <span style="color:#ccc;">|</span>
-        <span style="margin:0 8px;">Total <b style="color:var(--posco-blue); font-size:18px;">{total_cnt}</b></span>
-      </div>
-    </div>
-    <footer class="copyright">
-'''
-
-# footer 태그 앞에 조회수 삽입
 html_content = html_content.replace(
-    '<footer class="copyright">',
-    view_counter_html
+    '<b id="todayCount">0</b>',
+    f'<b id="todayCount">{today_cnt}</b>'
+)
+html_content = html_content.replace(
+    '<b id="totalCount">0</b>',
+    f'<b id="totalCount">{total_cnt}</b>'
 )
 
 # ================================================================
-# HTML 렌더링 (원본 100% 유지 + 조회수만 삽입)
+# HTML 렌더링 (원본 100% 유지, 조회수 값만 치환됨)
 # ================================================================
 components.html(
     html_content,
-    height=2600,       # 새 버전은 섹션이 늘어나 조금 더 여유 있게
+    height=2600,
     scrolling=True
 )
