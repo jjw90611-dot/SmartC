@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# 조회수 데이터 (선택: 로컬만 관리하려면 포함)
+# view_count.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+.DS_Store
