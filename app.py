@@ -972,4 +972,4 @@ st.download_button(
     use_container_width=True,
 )
 
-st.caption("© 2026 포스코퓨처엠 안전보건팀 | 원본 17페이지 양식 정확 재현 버전")
+st.caption("© 2026 포스코퓨처엠 안전부서 | 원본 17페이지 양식 정확 재현 버전")
