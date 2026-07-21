@@ -205,16 +205,18 @@ def create_word_document(data):
     doc.add_page_break()
 
     # ============================================================
-    # Page 4 : 2. 유해∙위험요인
+    # Page 4 : 2. 유해∙위험요인 (산화니켈 / N2 / 내화물)
     # ============================================================
     add_header_marker(doc)
     add_section_title(doc, '2. 밀폐공간 내 질식∙중독 등을 일으킬 수 있는\n     유해∙위험요인의 파악 및 관리방안', size=12)
 
-    t3 = doc.add_table(rows=10, cols=3)
+    # 총 16행 (헤더 1 + 산화니켈 4 + N2 5 + 내화물 6)
+    t3 = doc.add_table(rows=16, cols=3)
     t3.alignment = WD_TABLE_ALIGNMENT.CENTER
     for i, h in enumerate(['물질명', '유해위험요인', '대책']):
         write_cell(t3.cell(0, i), h, bold=True, bg=HEADER_BG)
 
+    # --- 산화니켈 (4행) ---
     write_cell(t3.cell(1, 0), '예시)\n산화니켈', bold=True)
     write_cell(t3.cell(1, 1), '질식')
     write_cell(t3.cell(1, 2),
@@ -237,6 +239,7 @@ def create_word_document(data):
         '‑ 구토를 할 경우 구토물이 기도를 막는 것을 방지하기 위해\n  머리를 둔부보다 낮추도록 할 것\n‑ 즉시 의사의 진료를 받을 것',
         size=9, align='left', v_align='top')
 
+    # --- N2 (5행) ---
     write_cell(t3.cell(5, 0), '예시)\nN2', bold=True)
     write_cell(t3.cell(5, 1), '질식')
     write_cell(t3.cell(5, 2),
@@ -261,37 +264,100 @@ def create_word_document(data):
     write_cell(t3.cell(9, 1), '섭취 시')
     write_cell(t3.cell(9, 2), '많은 양의 화학물질을 섭취한 경우 의사의 진찰을 받을 것',
         size=9, align='left', v_align='top')
-    t3.cell(1, 0).merge(t3.cell(4, 0))
-    t3.cell(5, 0).merge(t3.cell(9, 0))
+
+    # --- 내화물 (6행) ---
+    write_cell(t3.cell(10, 0), '내화물', bold=True)
+    write_cell(t3.cell(10, 1), '흡입')
+    write_cell(t3.cell(10, 2),
+        '건조한 재료의 분진을 많이 흡입했을 때는 즉시 신선한 공기가\n'
+        '있는 곳으로 이동시키고, 호흡에 이상이 있는 경우에는 즉시\n'
+        '의사의 진단을 받는다.',
+        size=9, align='left', v_align='top')
+    write_cell(t3.cell(11, 1), '피부 접촉')
+    write_cell(t3.cell(11, 2),
+        '‑ 물과 비누로 씻는다.\n‑ 긴급 의료조치를 받는다.',
+        size=9, align='left', v_align='top')
+    write_cell(t3.cell(12, 1), '눈에 접촉')
+    write_cell(t3.cell(12, 2),
+        '즉시 정상적인 물 또는 세안물로 세척하고 이상이 있는 경우는\n의사의 진단을 받는다.',
+        size=9, align='left', v_align='top')
+    write_cell(t3.cell(13, 1), '산소 결핍')
+    write_cell(t3.cell(13, 2),
+        '작업 전 ILS 실시 및 가스검지를 실시하며,\n'
+        '작업 중 고정식 가스검지기를 운용하여 산소농도 측정',
+        size=9, align='left', v_align='top')
+    write_cell(t3.cell(14, 1), '먹었을 때')
+    write_cell(t3.cell(14, 2),
+        '노출되거나 노출이 우려되면 의학적인 조치·조언을 구할 것',
+        size=9, align='left', v_align='top')
+    write_cell(t3.cell(15, 1), '기타 의사의\n주의사항')
+    write_cell(t3.cell(15, 2),
+        '‑ 폭로시 의료진에게 연락하고 추적공사 등의 특별한 응급조치를\n  취할 것\n'
+        '‑ 의료인력이 해당물질에 대해 인지하고 보호조치를 취하도록 할 것',
+        size=9, align='left', v_align='top')
+
+    # --- 셀 병합 ---
+    t3.cell(1, 0).merge(t3.cell(4, 0))     # 산화니켈
+    t3.cell(5, 0).merge(t3.cell(9, 0))     # N2
+    t3.cell(10, 0).merge(t3.cell(15, 0))   # 내화물
     set_col_widths(t3, [2.5, 3, 10])
     doc.add_page_break()
 
     # ============================================================
-    # Page 5 : 3. 안전보건교육 및 훈련
+    # Page 5 : 3. 안전보건교육 및 훈련 (대상자별 2개 블록)
     # ============================================================
     add_header_marker(doc)
     add_section_title(doc, '3. 안전보건교육 및 훈련', size=14)
 
-    t4 = doc.add_table(rows=3, cols=2)
+    t4 = doc.add_table(rows=4, cols=2)
     t4.alignment = WD_TABLE_ALIGNMENT.CENTER
+
+    # 헤더
     write_cell(t4.cell(0, 0), '특별안전보건교육내용\n(산업안전보건법 시행규칙 별표5)', bold=True, bg=HEADER_BG)
     write_cell(t4.cell(0, 1), '교육일정 및 강사', bold=True, bg=HEADER_BG)
+
+    # 1) 밀폐공간에서의 작업자
     write_cell(t4.cell(1, 0),
-        '교육내용\n'
+        '1) 밀폐공간에서의 작업자\n'
         '○ 산소농도 측정 및 작업환경에 관한 사항\n'
-        '○ 사고 시의 응급처지 및 비상 시 구출에 관한 사항\n'
-        '○ 보호구 착용 및 사용방법에 관한 사항 요령\n'
-        '○ 작업내용 ∙ 안전작업방법 및 절차에 관한 사항\n'
-        '○ 장비 ∙ 설비 및 시설 등의 안전점검에 관한 사항\n'
-        '○ 그 밖에 안전 ∙ 보건관리에 필요한 사항',
+        '○ 사고 시의 응급처치 및 비상 시 구출에 관한 사항\n'
+        '○ 보호구 착용 및 보호 장비 사용에 관한 사항\n'
+        '○ 작업내용ㆍ안전작업방법 및 절차에 관한 사항\n'
+        '○ 장비ㆍ설비 및 시설 등의 안전점검에 관한 사항\n'
+        '○ 그 밖에 안전ㆍ보건관리에 필요한 사항',
         align='left', v_align='top')
     write_cell(t4.cell(1, 1),
-        f'○ 특별안전보건교육\n  ‑ 일정 : {data["edu_date"]}\n  ‑ 강사 : {data["instructor"]}',
+        f'○ 특별안전보건교육\n'
+        f'  ‑ 일정 : {data["edu_date"]}\n'
+        f'  ‑ 강사 : {data["instructor"]}\n'
+        f'  ‑ 대상 : 밀폐공간 작업자',
         align='left', v_align='top')
+
+    # 2) 산소 및 유해가스 농도 측정·평가자
     write_cell(t4.cell(2, 0),
-        '○ 기타사항\n  ‑ 특별안전 교육 일지 및 보관\n  ‑ 교육일지 양식 활용',
+        '2) 밀폐공간의 산소 및 유해가스 농도를 측정 및 평가하는 자\n'
+        '① 밀폐공간의 위험성\n'
+        '② 측정장비의 이상 유무 확인 및 조작 방법\n'
+        '③ 밀폐공간 내에서의 산소 및 유해가스 농도 측정방법\n'
+        '④ 적정공기의 기준과 평가 방법',
         align='left', v_align='top')
-    write_cell(t4.cell(2, 1), '* 교육사진\n\n(사진 부착 영역)', align='center', v_align='center')
+    write_cell(t4.cell(2, 1),
+        f'○ 측정·평가자 교육\n'
+        f'  ‑ 일정 : {data["edu_date"]}\n'
+        f'  ‑ 강사 : {data["instructor"]}\n'
+        f'  ‑ 대상 : 안전관리자, 보건관리자,\n'
+        f'         관리감독자 등 측정·평가자',
+        align='left', v_align='top')
+
+    # 기타사항 + 교육사진
+    write_cell(t4.cell(3, 0),
+        '○ 기타사항\n'
+        '  ‑ 특별안전 교육 일지 작성 및 보관\n'
+        '  ‑ 교육일지 양식 활용\n'
+        '  ‑ 교육 이수자 명단 및 서명 관리',
+        align='left', v_align='top')
+    write_cell(t4.cell(3, 1), '* 교육사진\n\n(사진 부착 영역)', align='center', v_align='center')
+
     set_col_widths(t4, [8.5, 7])
     doc.add_page_break()
 
@@ -352,7 +418,6 @@ def create_word_document(data):
 
     add_para(doc, '', size=6)
     add_para(doc, '(4) 비상연락체계', size=11, bold=True, space_after=6)
-    # ★ 안전대응팀 열 삭제 → 2열 구조로 변경
     t8 = doc.add_table(rows=6, cols=2)
     t8.alignment = WD_TABLE_ALIGNMENT.CENTER
     for i, h in enumerate(['구 분', '성 명']):
