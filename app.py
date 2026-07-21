@@ -16,7 +16,7 @@ st.set_page_config(
 )
 
 # ================================================================
-# Streamlit 기본 UI 요소 숨기기 (원본 HTML 디자인 유지)
+# Streamlit 기본 UI 요소 숨기기 (원본 HTML 디자인 100% 유지)
 # ================================================================
 hide_streamlit_style = """
 <style>
@@ -24,12 +24,13 @@ hide_streamlit_style = """
     footer {visibility: hidden;}
     header {visibility: hidden;}
     .stDeployButton {display: none;}
+    .stAppDeployButton {display: none;}
+    [data-testid="stToolbar"] {visibility: hidden;}
+    [data-testid="stDecoration"] {visibility: hidden;}
+    [data-testid="stStatusWidget"] {visibility: hidden;}
     .block-container {
-        padding-top: 0rem;
-        padding-bottom: 0rem;
-        padding-left: 0rem;
-        padding-right: 0rem;
-        max-width: 100%;
+        padding: 0 !important;
+        max-width: 100% !important;
     }
     .stApp {
         margin: 0;
@@ -39,6 +40,7 @@ hide_streamlit_style = """
         width: 100%;
         border: none;
     }
+    section[data-testid="stSidebar"] {display: none;}
 </style>
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
@@ -87,21 +89,32 @@ today_cnt, total_cnt = update_counter()
 html_path = Path(__file__).parent / "index.html"
 html_content = html_path.read_text(encoding="utf-8")
 
-# 조회수 가짜 데이터를 실제 카운터로 치환
+# ================================================================
+# 조회수 표시 (footer 위에 삽입) - 원본 코드 훼손 없이 삽입만 진행
+# ================================================================
+view_counter_html = f'''
+    <div style="text-align:center; padding: 16px 18px 0 18px; background: var(--bg);">
+      <div style="display:inline-flex; align-items:center; background:white; border:1px solid var(--border); border-radius:12px; padding:10px 20px; box-shadow:0 2px 8px rgba(0,0,0,0.05); font-size:16px; color:var(--posco-navy);">
+        <span style="margin:0 8px;">📊 조회수</span>
+        <span style="margin:0 8px;">Today <b style="color:var(--posco-blue); font-size:18px;">{today_cnt}</b></span>
+        <span style="color:#ccc;">|</span>
+        <span style="margin:0 8px;">Total <b style="color:var(--posco-blue); font-size:18px;">{total_cnt}</b></span>
+      </div>
+    </div>
+    <footer class="copyright">
+'''
+
+# footer 태그 앞에 조회수 삽입
 html_content = html_content.replace(
-    'document.getElementById(\'todayCount\').innerText = "12";',
-    f'document.getElementById(\'todayCount\').innerText = "{today_cnt}";'
-)
-html_content = html_content.replace(
-    'document.getElementById(\'totalCount\').innerText = "345";',
-    f'document.getElementById(\'totalCount\').innerText = "{total_cnt}";'
+    '<footer class="copyright">',
+    view_counter_html
 )
 
 # ================================================================
-# HTML 렌더링 (원본 100% 유지)
+# HTML 렌더링 (원본 100% 유지 + 조회수만 삽입)
 # ================================================================
 components.html(
     html_content,
-    height=2400,       # 결과 페이지 전체가 보이도록 넉넉히 설정
+    height=2600,       # 새 버전은 섹션이 늘어나 조금 더 여유 있게
     scrolling=True
 )
