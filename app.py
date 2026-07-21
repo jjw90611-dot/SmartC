@@ -60,7 +60,7 @@ def add_para(doc, text, size=10, bold=False, align='left', space_after=6, space_
     return p
 
 def add_header_marker(doc):
-    add_para(doc, 'POSCO FUTURE M: Company Use Only', size=9, align='right', space_after=6, color=(100, 100, 100))
+    add_para(doc, 'POSCOFUTUREM', size=9, align='right', space_after=6, color=(100, 100, 100))
 
 def add_section_title(doc, text, size=15):
     p = doc.add_paragraph()
@@ -87,7 +87,7 @@ def calc_volume(shape, W, L, H, D):
     return rect + cyl
 
 # =========================================================
-# 메인 문서 생성 (원본 17페이지 양식 정확 반영)
+# 메인 문서 생성
 # =========================================================
 def create_word_document(data):
     doc = Document()
@@ -103,7 +103,7 @@ def create_word_document(data):
     style.font.size = Pt(10)
 
     # ============================================================
-    # Page 1 : 표지 (1페이지 내 완전 수록)
+    # Page 1 : 표지
     # ============================================================
     add_header_marker(doc)
     doc.add_paragraph()
@@ -134,7 +134,7 @@ def create_word_document(data):
     doc.add_page_break()
 
     # ============================================================
-    # Page 2 : 목차 (원본대로 5장까지 + 첨부)
+    # Page 2 : 목차
     # ============================================================
     add_header_marker(doc)
     add_section_title(doc, '목차', size=20)
@@ -352,19 +352,16 @@ def create_word_document(data):
 
     add_para(doc, '', size=6)
     add_para(doc, '(4) 비상연락체계', size=11, bold=True, space_after=6)
-    t8 = doc.add_table(rows=6, cols=3)
+    # ★ 안전대응팀 열 삭제 → 2열 구조로 변경
+    t8 = doc.add_table(rows=6, cols=2)
     t8.alignment = WD_TABLE_ALIGNMENT.CENTER
-    for i, h in enumerate(['성 명', '연 락 처', '포스코퓨처엠 안전대응팀']):
+    for i, h in enumerate(['구 분', '성 명']):
         write_cell(t8.cell(0, i), h, bold=True, bg=HEADER_BG)
     labels = ['현장소장', '안전관리자', '관리감독자', '작업반장', '기타']
     for i, lab in enumerate(labels):
         write_cell(t8.cell(i+1, 0), lab)
         write_cell(t8.cell(i+1, 1), data['manager'] if lab == '현장소장' else '')
-    write_cell(t8.cell(1, 2), '', bold=True)
-    for r in range(2, 6):
-        write_cell(t8.cell(r, 2), '')
-    t8.cell(1, 2).merge(t8.cell(5, 2))
-    set_col_widths(t8, [4, 6, 5.5])
+    set_col_widths(t8, [5, 10.5])
 
     add_para(doc, '', size=6)
     add_para(doc, '(5) 작업자 정보', size=11, bold=True, space_after=6)
@@ -553,7 +550,7 @@ def create_word_document(data):
     doc.add_page_break()
 
     # ============================================================
-    # Page 11 : 측정 상세 + 나. 측정지점/측정방법 + 형태별 도식
+    # Page 11 : 측정 상세
     # ============================================================
     add_header_marker(doc)
     add_para(doc, '* 다음의 경우 반드시 측정할 것', size=10, bold=True, space_after=2)
@@ -597,7 +594,7 @@ def create_word_document(data):
     doc.add_page_break()
 
     # ============================================================
-    # Page 12 : * 유의사항 + 다. 환기 + 작업장소 용적 + 환기팬 용량
+    # Page 12 : 유의사항 + 다. 환기 + 작업장소 용적 + 환기팬 용량
     # ============================================================
     add_header_marker(doc)
     add_para(doc, '* 유의사항', size=11, bold=True, space_after=4)
@@ -641,9 +638,6 @@ def create_word_document(data):
     add_para(doc, '', size=6)
     add_para(doc, '■ 환기팬 용량   * 아래 송풍기/배풍기 위치도에 표시 1,2,3', size=10, bold=True, space_after=4)
 
-    Q_need_min = volume * 0.4
-    Q_need_hr = Q_need_min * 60
-
     t_fan = doc.add_table(rows=5, cols=5)
     t_fan.alignment = WD_TABLE_ALIGNMENT.CENTER
     for i, h in enumerate(['구분', '모델명', '환기팬 용량\n(m³/h)', '수량\n(EA)', '장비관리담당자\n(협력업체)']):
@@ -662,7 +656,7 @@ def create_word_document(data):
     doc.add_page_break()
 
     # ============================================================
-    # Page 13 : 환기팬 능력 계산 예시 + 위치도 + 작업장소별 환기량
+    # Page 13 : 환기팬 능력 계산 예시
     # ============================================================
     add_header_marker(doc)
     add_para(doc, '■ 환기팬 환기능력 계산 (예시)', size=11, bold=True, space_after=6)
@@ -922,7 +916,7 @@ edu_date = st.sidebar.text_input("교육일정", "2026.06.15 08:00~09:00")
 instructor = st.sidebar.text_input("강사", "안전관리자 김안전")
 
 st.sidebar.markdown("---")
-st.sidebar.subheader("📐 밀폐공간 체적 계산 (환기시설 표 자동 반영)")
+st.sidebar.subheader("📐 밀폐공간 체적 계산")
 shape = st.sidebar.selectbox("공간 형태", options=['rect', 'cyl', 'combined'],
                               format_func=lambda x: {'rect': '사각형', 'cyl': '원통형', 'combined': '결합형'}[x])
 W = st.sidebar.number_input("가로 W (m)", value=6.0, step=0.1)
@@ -931,14 +925,6 @@ H = st.sidebar.number_input("높이 H (m)", value=6.0, step=0.1)
 D = st.sidebar.number_input("직경 D (m) - 원통형만", value=0.0, step=0.1)
 
 st.title("📄 포스코퓨처엠 밀폐공간 작업 프로그램 자동 작성기")
-st.markdown("""
-**원본 17페이지 양식 정확 반영 버전 (v2.1)**
-- ✅ 표지 1페이지 완전 수록 (여백 및 폰트 최적화)
-- ✅ S-OIL 참조양식 정보 완전 제거 → **포스코퓨처엠으로 통일**
-- ✅ 헤더 표기 : `POSCO FUTURE M: Company Use Only`
-- ✅ 가스 기준 정정 : O₂ 20%↑ / H₂S 1ppm↓ / CO 25ppm↓
-- ✅ 환기시설 표, 특이사항, 환기팬 계산, 보호구, 응급처치까지 원본 순서대로 완전 재현
-""")
 
 vol_preview = calc_volume(shape, W, L, H, D)
 col1, col2 = st.columns(2)
@@ -965,11 +951,9 @@ data = {
 word_file = create_word_document(data)
 
 st.download_button(
-    label="📥 밀폐공간 작업 프로그램 (원본 양식 v2.1) 다운로드",
+    label="📥 밀폐공간 작업 프로그램 다운로드",
     data=word_file,
     file_name=f"밀폐공간_작업프로그램_{project_name}.docx",
     mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     use_container_width=True,
 )
-
-st.caption("© 2026 포스코퓨처엠 안전부서 | 원본 17페이지 양식 정확 재현 버전")
